@@ -14,8 +14,10 @@ GameObject:
   - component: {fileID: -4495717042766148894}
   - component: {fileID: 1748960743808587953}
   - component: {fileID: 6734048038000713068}
-  - component: {fileID: -7635632795780265333}
-  - component: {fileID: 1734699175288472594}
+  - component: {fileID: 8862925188714740247}
+  - component: {fileID: -3444751824276310429}
+  - component: {fileID: -8381720897788668560}
+  - component: {fileID: -7391974091430633658}
   m_Layer: 0
   m_Name: Asteroid
   m_TagString: Untagged
@@ -73,10 +75,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BodyType: 2
-  m_StartLinearVelocity:
-    x: 0
-    y: 0
-  m_GravityScale: 1
 --- !u!114 &-4495717042766148894
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -101,15 +99,23 @@ MonoBehaviour:
   RefGameObjects:
   - {fileID: 492490812717392602}
   - {fileID: 492490812717392602}
-  RefGuids: 00000000000000000000000000000000
+  - {fileID: 492490812717392602}
+  - {fileID: 492490812717392602}
+  RefGuids: 0000000000000000000000000000000000000000000000000000000000000000
   ComponentNames:
-  - Xedrial.Physics.RigidBody2DComponent
-  - Xedrial.Physics.BoxCollider2DComponent
+  - Xedrial.Physics.b2D.Components.BodyDef
+  - Xedrial.Physics.b2D.Components.FixtureDef
+  - Xedrial.Physics.b2D.Components.PhysicsGravityScale2D
+  - Xedrial.Physics.b2D.Components.PhysicsVelocity2D
   PrefabTypeOverrides:
   - Value: 4
     OverrideIndex: 0
   - Value: 4
     OverrideIndex: 1
+  - Value: 4
+    OverrideIndex: 2
+  - Value: 4
+    OverrideIndex: 3
   SendTypeOverrides: []
   VariantOverrides: []
   SendForChild: []
@@ -137,27 +143,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b971ac66f032408fa993798ff1689525, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!212 &-7635632795780265333
-SpriteRenderer:
+--- !u!33 &8862925188714740247
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 492490812717392602}
+  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &-3444751824276310429
+MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 492490812717392602}
   m_Enabled: 1
-  m_CastShadows: 0
-  m_ReceiveShadows: 0
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 0
+  m_RayTracingMode: 2
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: aedb4d67777cd5042b3502f57ef82925, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -170,7 +184,7 @@ SpriteRenderer:
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
   m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 0
+  m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
@@ -178,18 +192,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -2413806693520163455, guid: ebe73ca9363db456bacf42c025bb4847, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_FlipX: 0
-  m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
-  m_AdaptiveModeThreshold: 0.5
-  m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
-  m_SpriteSortPoint: 0
---- !u!114 &1734699175288472594
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &-8381720897788668560
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -198,7 +202,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 492490812717392602}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 581c3376ca2b6f447972e18d77bb4059, type: 3}
+  m_Script: {fileID: 11500000, guid: 710e04ad75394af7b4951fa4fe4a2510, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Mesh: {fileID: 0}
+  Linear:
+    x: 0
+    y: 0
+  Angular: 0
+--- !u!114 &-7391974091430633658
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 492490812717392602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8fd2385fcc24c418e0974ab3fd73b7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Value: 0

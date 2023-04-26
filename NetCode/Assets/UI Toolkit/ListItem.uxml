@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/TitleScreenUI.uss?fileID=7433441132597879392&amp;guid=c4dff46e8dad04546bd622dfe86ca398&amp;type=3#TitleScreenUI" />
+    <ui:VisualElement name="row" class="row">
+        <ui:VisualElement name="game-name-data" class="game-name-data">
+            <ui:Label text="Mary&apos;s Game" name="game-name" class="list-item-game-name" />
+            <ui:Label text="Game Name" name="game-name-label" class="list-item-game-name-label" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

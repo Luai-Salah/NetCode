@@ -1,0 +1,411 @@
+.screen {
+    flex-grow: 1;
+    background-color: rgb(58, 58, 58);
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.header {
+    position: absolute;
+    top: 0;
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+    height: 108px;
+}
+
+.logo {
+    flex-grow: 1;
+    width: auto;
+    height: 68px;
+    margin-left: 10px;
+    max-width: 200px;
+    -unity-background-scale-mode: scale-to-fit;
+    background-image: url('project://database/Assets/Sprites/moetsi-logo-hq.png?fileID=2800000&guid=3c12942e6b7c689409810ed400028dce&type=3#moetsi-logo-hq');
+}
+
+.quit-button {
+    width: 120px;
+    height: 68px;
+    margin-left: 0;
+    margin-right: 10px;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 24px;
+    background-color: rgba(88, 88, 88, 0);
+    color: rgb(224, 224, 224);
+    border-left-color: rgb(224, 224, 224);
+    border-right-color: rgb(224, 224, 224);
+    border-top-color: rgb(224, 224, 224);
+    border-bottom-color: rgb(224, 224, 224);
+    border-left-width: 3px;
+    border-right-width: 3px;
+    border-top-width: 3px;
+    border-bottom-width: 3px;
+    border-radius: 10px;
+    -unity-font: resource('FlatSkin/Font/Roboto-Bold');
+    -unity-font-style: bold;
+}
+
+.quit-button:hover {
+    border-left-color: rgb(195, 195, 195);
+    border-right-color: rgb(195, 195, 195);
+    border-top-color: rgb(195, 195, 195);
+    border-bottom-color: rgb(195, 195, 195);
+    border-width: 5px;
+    border-radius: 9px;
+}
+
+.quit-button:active {
+    background-color: rgb(204, 204, 204);
+    color: rgb(164, 164, 164);
+    border-left-color: rgb(164, 164, 164);
+    border-right-color: rgb(164, 164, 164);
+    border-top-color: rgb(164, 164, 164);
+    border-bottom-color: rgb(164, 164, 164);
+    border-width: 5px;
+    border-radius: 9px;
+}
+
+.main-content {
+    position: absolute;
+    top: 108px;
+    align-items: center;
+    width: 100%;
+    max-width: 650px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.title {
+    margin-top: 100px;
+    padding-top: 100px;
+    font-size: 64px;
+    -unity-font-style: bold;
+    white-space: normal;
+    -unity-text-align: upper-center;
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    color: rgb(224, 224, 224);
+}
+
+.section-title-container {
+    width: 100%;
+    margin-top: 100px;
+    padding-top: 0;
+    color: rgb(224, 224, 224);
+}
+
+.section-title {
+    font-size: 36px;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.blue-button {
+    flex-wrap: wrap;
+    width: 100%;
+    height: 68px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 21px;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: rgb(150, 191, 208);
+    white-space: normal;
+    background-color: rgba(88, 88, 88, 0);
+    border-left-color: rgb(150, 191, 208);
+    border-right-color: rgb(150, 191, 208);
+    border-top-color: rgb(150, 191, 208);
+    border-bottom-color: rgb(150, 191, 208);
+    border-left-width: 5px;
+    border-right-width: 5px;
+    border-top-width: 5px;
+    border-bottom-width: 5px;
+    border-radius: 10px;
+}
+
+.blue-button:hover {
+    flex-wrap: wrap;
+    width: 100%;
+    height: 68px;
+    margin: 21px 0 0;
+    padding: 0;
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: rgb(150, 191, 208);
+    white-space: normal;
+    background-color: rgba(88, 88, 88, 0);
+    border-left-color: rgb(110, 145, 159);
+    border-right-color: rgb(110, 145, 159);
+    border-top-color: rgb(110, 145, 159);
+    border-bottom-color: rgb(110, 145, 159);
+    border-left-width: 9px;
+    border-right-width: 9px;
+    border-top-width: 9px;
+    border-bottom-width: 9px;
+    border-radius: 9px;
+}
+
+.blue-button:active {
+    flex-wrap: wrap;
+    width: 100%;
+    height: 68px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 21px;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: rgb(176, 224, 244);
+    white-space: normal;
+    background-color: rgb(88, 120, 132);
+    border-left-color: rgb(150, 191, 208);
+    border-right-color: rgb(150, 191, 208);
+    border-top-color: rgb(150, 191, 208);
+    border-bottom-color: rgb(150, 191, 208);
+    border-left-width: 5px;
+    border-right-width: 5px;
+    border-top-width: 5px;
+    border-bottom-width: 5px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.green-button {
+    flex-wrap: wrap;
+    width: 100%;
+    height: 120px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 36px;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 36px;
+    color: rgb(160, 194, 114);
+    background-color: rgba(88, 88, 88, 0);
+    border-left-color: rgb(160, 194, 114);
+    border-right-color: rgb(160, 194, 114);
+    border-top-color: rgb(160, 194, 114);
+    border-bottom-color: rgb(160, 194, 114);
+    border-left-width: 5px;
+    border-right-width: 5px;
+    border-top-width: 5px;
+    border-bottom-width: 5px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.green-button:hover {
+    flex-wrap: wrap;
+    width: 100%;
+    height: 120px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 36px;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 36px;
+    color: rgb(160, 194, 114);
+    background-color: rgba(88, 88, 88, 0);
+    border-left-color: rgb(133, 161, 95);
+    border-right-color: rgb(133, 161, 95);
+    border-top-color: rgb(133, 161, 95);
+    border-bottom-color: rgb(133, 161, 95);
+    border-left-width: 7px;
+    border-right-width: 7px;
+    border-top-width: 7px;
+    border-bottom-width: 7px;
+    border-top-left-radius: 9px;
+    border-bottom-left-radius: 9px;
+    border-top-right-radius: 9px;
+    border-bottom-right-radius: 9px;
+}
+
+.green-button:active {
+    flex-wrap: wrap;
+    width: 100%;
+    height: 120px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 36px;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 36px;
+    color: rgb(187, 226, 133);
+    background-color: rgb(132, 159, 93);
+    border-left-color: rgb(160, 194, 114);
+    border-right-color: rgb(160, 194, 114);
+    border-top-color: rgb(160, 194, 114);
+    border-bottom-color: rgb(160, 194, 114);
+    border-left-width: 5px;
+    border-right-width: 5px;
+    border-top-width: 5px;
+    border-bottom-width: 5px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.data-section {
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.data-section-label {
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    color: rgb(160, 194, 114);
+    margin-bottom: 18px;
+    font-size: 20px;
+}
+
+.data-section-input {
+    flex-direction: column-reverse;
+    height: 68px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 18px;
+    margin-bottom: 0;
+    font-size: 36px;
+    color: rgb(160, 194, 114);
+    width: auto;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.data-section-input > .unity-base-field__input {
+    background-color: rgba(0, 0, 0, 0);
+    border-left-color: rgb(224, 224, 224);
+    border-right-color: rgb(224, 224, 224);
+    border-top-color: rgb(224, 224, 224);
+    border-bottom-color: rgb(224, 224, 224);
+    border-left-width: 5px;
+    border-right-width: 5px;
+    border-top-width: 5px;
+    border-bottom-width: 5px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    padding-left: 5px;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.input-field {
+    width: 100%;
+    flex-grow: 0;
+    font-size: 20px;
+    -unity-text-align: middle-left;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-right: 0;
+    margin-left: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+    -unity-font-style: bold;
+    height: 100px;
+}
+
+.row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 74px;
+}
+
+.game-name-data {
+    margin-left: 17px;
+}
+
+.list-item-game-name {
+    margin-left: 0;
+    font-size: 24px;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    color: rgb(150, 191, 208);
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.list-item-game-name-label {
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 10px;
+    color: rgb(224, 224, 224);
+}
+
+.list-item-button {
+    width: 141px;
+    height: 46px;
+    margin-left: 0;
+    margin-right: 12px;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+}
+
+.list-view {
+    width: 100%;
+    height: 100%;
+}
+
+.list-view > .unity-list-view__item {
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+}
+
+.list-view > .unity-list-view__item:hover {
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+}

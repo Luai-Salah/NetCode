@@ -4,6 +4,5 @@ namespace Xedrial.NetCode
 {
     public class ServerLaunchObjectData : MonoBehaviour
     {
-        
     }
 }

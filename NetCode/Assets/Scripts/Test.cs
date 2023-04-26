@@ -1,5 +1,8 @@
 using UnityEngine;
 
-public class Test : MonoBehaviour
+namespace AsteroidsDamage
 {
+    public class Test : MonoBehaviour
+    {
+    }
 }

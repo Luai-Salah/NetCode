@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="HostGameScreen" src="project://database/Assets/UI%20Toolkit/HostGameScreen.uxml?fileID=9197481963319205126&amp;guid=3162331ad4e15a44a92e76b4b9eacf49&amp;type=3#HostGameScreen" />
+    <ui:Template name="JoinGameScreen" src="project://database/Assets/UI%20Toolkit/JoinGameScreen.uxml?fileID=9197481963319205126&amp;guid=690f3ac6568beeb4f811d48c9fc62c3f&amp;type=3#JoinGameScreen" />
+    <ui:Template name="ManualConnetScreen" src="project://database/Assets/UI%20Toolkit/ManualConnectScreen.uxml?fileID=9197481963319205126&amp;guid=378be134d0cc7664e8aa39151c5fdc36&amp;type=3#ManualConnectScreen" />
+    <ui:Template name="TitleScreen" src="project://database/Assets/UI%20Toolkit/TitleScreen.uxml?fileID=9197481963319205126&amp;guid=e724af66fa88315468263867db95af7c&amp;type=3#TitleScreen" />
+    <Style src="project://database/Assets/UI%20Toolkit/TitleScreenUI.uss?fileID=7433441132597879392&amp;guid=c4dff46e8dad04546bd622dfe86ca398&amp;type=3#TitleScreenUI" />
+    <Xedrial.NetCode.UI.TitleScreenManager name="TitleScreenManager" class="screen">
+        <ui:Instance template="HostGameScreen" name="HostGameScreen" class="screen" style="display: none;" />
+        <ui:Instance template="JoinGameScreen" name="JoinGameScreen" class="screen" style="display: none;" />
+        <ui:Instance template="ManualConnetScreen" name="ManualConnectScreen" class="screen" style="display: none;" />
+        <ui:Instance template="TitleScreen" name="TitleScreen" class="screen" />
+    </Xedrial.NetCode.UI.TitleScreenManager>
+</ui:UXML>

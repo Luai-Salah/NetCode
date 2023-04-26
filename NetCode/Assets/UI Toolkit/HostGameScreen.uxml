@@ -1,0 +1,27 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/TitleScreenUI.uss?fileID=7433441132597879392&amp;guid=c4dff46e8dad04546bd622dfe86ca398&amp;type=3#TitleScreenUI" />
+    <Xedrial.NetCode.UI.HostGameScreen name="HostGameScreen" class="screen">
+        <ui:VisualElement name="header" class="header">
+            <ui:VisualElement name="logo" class="logo" />
+            <ui:Button text="Main Menu" display-tooltip-when-elided="true" name="main-menu-button" class="quit-button" style="width: 150px;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="main-content" class="main-content">
+            <ui:VisualElement name="host-local-title" class="section-title-container" style="-unity-font-style: bold;">
+                <ui:Label text="Host a Game" display-tooltip-when-elided="true" name="join-a-local-game" class="section-title" />
+            </ui:VisualElement>
+            <ui:VisualElement name="game-name-container" class="data-section">
+                <ui:TextField picking-mode="Ignore" value="GameNameValue" text="GameName" name="game-name" readonly="false" class="data-section-input" style="background-color: rgba(0, 0, 0, 0);" />
+                <ui:Label text="Your Game&apos;s Name" display-tooltip-when-elided="true" name="game-name-label" class="data-section-label" />
+            </ui:VisualElement>
+            <ui:VisualElement name="game-ip-container" class="data-section">
+                <ui:TextField picking-mode="Ignore" value="HostIPValue" text="127.0.0.1" name="game-ip" readonly="false" class="data-section-input" />
+                <ui:Label text="Your Game&apos;s IP Address" display-tooltip-when-elided="true" name="game-ip-label" class="data-section-label" />
+            </ui:VisualElement>
+            <ui:VisualElement name="player-name-container" class="data-section">
+                <ui:TextField picking-mode="Ignore" value="PlayerNameValue" text="ImPlayer" name="game-ip" readonly="false" class="data-section-input" style="border-left-color: rgb(150, 191, 208); border-right-color: rgb(150, 191, 208); border-top-color: rgb(150, 191, 208); border-bottom-color: rgb(150, 191, 208); background-color: rgba(0, 0, 0, 0); color: rgba(150, 191, 208, 255);" />
+                <ui:Label text="Your Player&apos;s Name" display-tooltip-when-elided="true" name="game-ip-label" class="data-section-label" style="color: rgb(150, 191, 208);" />
+            </ui:VisualElement>
+            <ui:Button text="Host Game" display-tooltip-when-elided="true" name="launch-host-game" class="green-button" style="-unity-font-style: bold;" />
+        </ui:VisualElement>
+    </Xedrial.NetCode.UI.HostGameScreen>
+</ui:UXML>

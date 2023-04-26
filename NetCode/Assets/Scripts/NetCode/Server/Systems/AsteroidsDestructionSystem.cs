@@ -3,7 +3,8 @@ using Unity.Entities;
 
 using AsteroidsDamage;
 using Xedrial.NetCode.Components;
-using Xedrial.Physics;
+using Xedrial.Physics.b2D.Components;
+using Xedrial.Physics.b2D.Systems;
 
 namespace Xedrial.NetCode.Server.Systems
 {
@@ -16,11 +17,11 @@ namespace Xedrial.NetCode.Server.Systems
     [UpdateInGroup(typeof(LateSimulationSystemGroup))]
     public partial class AsteroidsDestructionSystem : SystemBase
     {
-        private PhysicsWorld m_PhysicsWorld;
+        private PhysicsSystem m_PhysicsWorld;
 
         protected override void OnCreate()
         {
-            m_PhysicsWorld = World.GetOrCreateSystem<PhysicsWorld>();
+            m_PhysicsWorld = World.GetOrCreateSystem<PhysicsSystem>();
         }
 
         protected override void OnUpdate()
@@ -32,10 +33,10 @@ namespace Xedrial.NetCode.Server.Systems
                 .WithoutBurst()
                 .WithStructuralChanges()
                 .WithAll<DestroyTag, AsteroidTag>()
-                .ForEach((Entity entity, in RigidBody2DComponent rb) =>
+                .ForEach((Entity entity, PhysicsBody2D rb) =>
                 {
                     EntityManager.DestroyEntity(entity);
-                    m_PhysicsWorld.DestroyBody(rb.Body);
+                    m_PhysicsWorld.DestroyBody(rb.RuntimeBody);
                 }).Run();
 
         }

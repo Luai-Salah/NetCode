@@ -6,8 +6,8 @@ using UnityEngine;
 
 namespace Xedrial.NetCode
 {
-//ServerConnectionControl is run in ServerWorld and starts listening on a port
-//The port is provided by the ServerDataComponent
+    //ServerConnectionControl is run in ServerWorld and starts listening on a port
+    //The port is provided by the ServerDataComponent
     [UpdateInWorld(TargetWorld.Server)]
     public partial class ServerConnectionControl : SystemBase
     {
@@ -17,7 +17,6 @@ namespace Xedrial.NetCode
         {
             // We require the InitializeServerComponent to be created before OnUpdate runs
             RequireSingletonForUpdate<InitializeServerComponent>();
-
         }
 
         protected override void OnUpdate()
@@ -35,7 +34,7 @@ namespace Xedrial.NetCode
             // the client is streamed data based on tiles that are near them
             //https://docs.unity3d.com/Packages/com.unity.netcode@0.5/manual/ghost-snapshots.html
             //check out "Distance based importance" in the link above
-            var grid = EntityManager.CreateEntity();
+            Entity grid = EntityManager.CreateEntity();
             EntityManager.AddComponentData(grid, new GhostDistanceImportance
             {
                 ScaleImportanceByDistance = GhostDistanceImportance.DefaultScaleFunctionPointer,
@@ -52,8 +51,8 @@ namespace Xedrial.NetCode
         }
     }
 
-//ClientConnectionControl is run in ClientWorld and connects to an IP address and port
-//The IP address and port is provided by the ClientDataComponent
+    //ClientConnectionControl is run in ClientWorld and connects to an IP address and port
+    //The IP address and port is provided by the ClientDataComponent
     [UpdateInWorld(TargetWorld.Client)]
     public partial class ClientConnectionControl : SystemBase
     {
@@ -64,14 +63,12 @@ namespace Xedrial.NetCode
         {
             // We require the component to be created before OnUpdate runs
             RequireSingletonForUpdate<InitializeClientComponent>();
-
         }
 
         protected override void OnUpdate()
         {
             //load up data to be used OnUpdate
-            Entity clientDataEntity = GetSingletonEntity<ClientDataComponent>();
-            var clientData = EntityManager.GetComponentData<ClientDataComponent>(clientDataEntity);
+            var clientData = GetSingleton<ClientDataComponent>();
 
             m_ConnectToServerIp = clientData.ConnectToServerIp.ToString();
             m_GamePort = clientData.GamePort;
