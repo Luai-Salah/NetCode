@@ -4,7 +4,7 @@ namespace Xedrial.NetCode.Components
 {
     public struct PlayerCommand : ICommandData
     {
-        public uint Tick { get; set; }
+        public NetworkTick Tick { get; set; }
         
         public byte Right;
         public byte Left;

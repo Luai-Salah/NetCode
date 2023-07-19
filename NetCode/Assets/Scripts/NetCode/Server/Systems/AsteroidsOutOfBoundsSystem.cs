@@ -2,7 +2,6 @@ using UnityEngine;
 
 using Unity.Entities;
 using Unity.Transforms;
-using Unity.NetCode;
 
 using AsteroidsDamage;
 using Xedrial.NetCode.Components;
@@ -11,7 +10,7 @@ namespace Xedrial.NetCode.Server.Systems
 {
     //We cannot use [UpdateInGroup(typeof(ServerSimulationSystemGroup))] because we already have a group defined
     //So we specify instead what world the system must run, ServerWorld
-    [UpdateInWorld(TargetWorld.Server)]
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     //We are adding this system within the FixedStepSimulationGroup
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateBefore(typeof(EndFixedStepSimulationEntityCommandBufferSystem))]
@@ -27,11 +26,11 @@ namespace Xedrial.NetCode.Server.Systems
         protected override void OnCreate()
         {
             //We grab the EndFixedStepSimECB for our OnUpdate
-            m_EndFixedStepSimEcb = World.GetOrCreateSystem<EndFixedStepSimulationEntityCommandBufferSystem>();
+            m_EndFixedStepSimEcb = World.GetOrCreateSystemManaged<EndFixedStepSimulationEntityCommandBufferSystem>();
 
             //We want to make sure we don't update until we have our GameSettingsComponent
             //because we need the data from this component to know where the perimeter of our cube is
-            RequireSingletonForUpdate<GameSettingsComponent>();
+            RequireForUpdate<GameSettings>();
         }
 
         protected override void OnUpdate()
@@ -41,18 +40,18 @@ namespace Xedrial.NetCode.Server.Systems
             var commandBuffer = m_EndFixedStepSimEcb.CreateCommandBuffer().AsParallelWriter();
 
             //We must declare our local variables that we will use in our job
-            var settings = GetSingleton<GameSettingsComponent>();
+            var settings = SystemAPI.GetSingleton<GameSettings>();
 
             //This time we query entities with components by using "WithAll" tag
             //This makes sure that we only grab entities with an AsteroidTag component so we don't affect other entities
             //that might have passed the perimeter of the cube  
             Entities
                 .WithAll<AsteroidTag>()
-                .ForEach((Entity entity, int entityInQueryIndex, in Translation position) =>
+                .ForEach((Entity entity, int entityInQueryIndex, in LocalTransform transform) =>
                 {
                     //We check if the current Translation value is out of bounds
-                    if (Mathf.Abs(position.Value.x) <= settings.LevelWidth / 2f &&
-                        Mathf.Abs(position.Value.y) <= settings.LevelHeight / 2f)
+                    if (Mathf.Abs(transform.Position.x) <= settings.LevelWidth / 2f &&
+                        Mathf.Abs(transform.Position.y) <= settings.LevelHeight / 2f)
                         return;
                     
                     //If it is out of bounds wee add the DestroyTag component to the entity and return

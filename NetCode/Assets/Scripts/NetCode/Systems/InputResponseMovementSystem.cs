@@ -11,20 +11,14 @@ namespace Xedrial.NetCode.Systems
 {
     //InputResponseMovementSystem runs on both the Client and Server
     //It is predicted on the client but "decided" on the server
-    [UpdateInWorld(TargetWorld.ClientAndServer)]
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation | WorldSystemFilterFlags.ClientSimulation)]
     // [UpdateInGroup(typeof(PredictedPhysicsSystemGroup))]
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
+    [UpdateInGroup(typeof(PredictedFixedStepSimulationSystemGroup))]
     public partial class InputResponseMovementSystem : SystemBase
     {
-        //This is a special NetCode group that provides a "prediction tick" and a fixed "DeltaTime"
-        private GhostPredictionSystemGroup m_PredictionGroup;
-        
         protected override void OnCreate()
         {
-            // m_BeginSimEcb = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
-
-            //We will grab this system so we can use its "prediction tick" and "DeltaTime"
-            m_PredictionGroup = World.GetOrCreateSystem<GhostPredictionSystemGroup>();
+            RequireForUpdate<GameSettings>();
         }
 
         protected override void OnUpdate()
@@ -33,27 +27,21 @@ namespace Xedrial.NetCode.Systems
             //We are setting values on components that already exist
             // var commandBuffer = m_BeginSimEcb.CreateCommandBuffer().AsParallelWriter();
 
-            //These are special NetCode values needed to work the prediction system
-            uint currentTick = m_PredictionGroup.PredictingTick;
-            float deltaTime = m_PredictionGroup.Time.DeltaTime;
+            float deltaTime = SystemAPI.Time.DeltaTime;
 
+            var currentTick = SystemAPI.GetSingleton<NetworkTime>().ServerTick;
             //We must declare our local variables before the .ForEach()
-            var gameSettings = GetSingleton<GameSettingsComponent>();
+            var gameSettings = SystemAPI.GetSingleton<GameSettings>();
 
             //We will grab the buffer of player commands from the player entity
-            BufferFromEntity<PlayerCommand> inputFromEntity = GetBufferFromEntity<PlayerCommand>(true);
+            BufferLookup<PlayerCommand> inputFromEntity = SystemAPI.GetBufferLookup<PlayerCommand>(true);
             //We are looking for player entities that have PlayerCommands in their buffer
             // ReSharper disable once UnusedParameter.Local
             Entities
                 .WithReadOnly(inputFromEntity)
-                .WithAll<PlayerTag, PlayerCommand>()
-                .ForEach((Entity entity, int entityInQueryIndex, ref Rotation rotation, ref Translation translation, 
-                    in PredictedGhostComponent prediction) =>
+                .WithAll<PlayerCommand, PredictedGhost, Simulate>()
+                .ForEach((Entity entity, int entityInQueryIndex, ref LocalTransform transform) =>
                 {
-                    // Here we check if we SHOULD do the prediction based on the tick, if we shouldn't, we return
-                    if (!GhostPredictionSystemGroup.ShouldPredict(currentTick, prediction))
-                        return;
-            
                     //We grab the buffer of commands from the player entity
                     DynamicBuffer<PlayerCommand> input = inputFromEntity[entity];
 
@@ -70,14 +58,13 @@ namespace Xedrial.NetCode.Systems
                         z = 0
                     };
                     
-                    translation.Value += gameSettings.PlayerForce * deltaTime * move;
+                    transform.Position += gameSettings.PlayerForce * deltaTime * move;
 
                     float angle = (inputData.RotateLeft - inputData.RotateRight) * gameSettings.RotationSpeed * deltaTime;
-                    rotation.Value = math.mul(rotation.Value, quaternion.RotateZ(angle));
-                }).ScheduleParallel();
+                    transform.Rotation = math.mul(transform.Rotation, quaternion.RotateZ(angle));
+                }).Schedule();
 
             //No need to .AddJobHandleForProducer() because we did not need a CommandBuffer to make structural changes
         }
-    
     }
 }

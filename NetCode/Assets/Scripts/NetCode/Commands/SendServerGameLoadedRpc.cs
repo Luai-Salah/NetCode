@@ -3,10 +3,10 @@ using UnityEngine;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.NetCode;
-using Unity.Networking.Transport;
-
 using AOT;
-
+using Unity.Assertions;
+using Unity.Burst.Intrinsics;
+using Unity.Collections;
 using Xedrial.NetCode.Components;
 
 namespace Xedrial.NetCode.Commands
@@ -57,21 +57,31 @@ namespace Xedrial.NetCode.Commands
     }
 
     //Necessary boilerplate
-    public class SendServerGameLoadedRpcCommandRequestSystem : RpcCommandRequestSystem<SendServerGameLoadedRpc, SendServerGameLoadedRpc>
+    [UpdateInGroup(typeof(RpcCommandRequestSystemGroup))]
+    [CreateAfter(typeof(RpcSystem))]
+    [BurstCompile]
+    internal partial struct SendServerGameLoadedRpcSystem : ISystem
     {
+        RpcCommandRequest<SendServerGameLoadedRpc, SendServerGameLoadedRpc> m_Request;
         [BurstCompile]
-        private struct SendRpc : IJobEntityBatch
+        private struct SendRpc : IJobChunk
         {
-            public SendRpcData Data;
-            public void Execute(ArchetypeChunk chunk, int orderIndex)
+            public RpcCommandRequest<SendServerGameLoadedRpc, SendServerGameLoadedRpc>.SendRpcData Data;
+            public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
             {
-                Data.Execute(chunk, orderIndex);
+                Assert.IsFalse(useEnabledMask);
+                Data.Execute(chunk, unfilteredChunkIndex);
             }
         }
-        protected override void OnUpdate()
+        public void OnCreate(ref SystemState state)
         {
-            var sendJob = new SendRpc{Data = InitJobData()};
-            ScheduleJobData(sendJob);
+            m_Request.OnCreate(ref state);
+        }
+        [BurstCompile]
+        public void OnUpdate(ref SystemState state)
+        {
+            var sendJob = new SendRpc{Data = m_Request.InitJobData(ref state)};
+            state.Dependency = sendJob.Schedule(m_Request.Query, state.Dependency);
         }
     }
 }

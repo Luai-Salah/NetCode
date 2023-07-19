@@ -1,9 +1,9 @@
 using Unity.Entities;
+using UnityEngine;
 
 namespace Xedrial.NetCode.Components
 {
-    [GenerateAuthoringComponent]
-    public struct BulletSpeedComponent : IComponentData
+    public struct BulletSpeed : IComponentData
     {
         public float Value;
     }

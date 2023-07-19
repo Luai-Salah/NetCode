@@ -1,10 +1,9 @@
 using Unity.Entities;
 
-namespace Xedrial.NetCode.Commands
+namespace Xedrial.NetCode.Server.Components
 {
-    [GenerateAuthoringComponent]
-    public struct PlayerAuthoringComponent : IComponentData
+    public struct PlayerPrefab : IComponentData
     {
-        public Entity Prefab;
+        public Entity Value;
     }
 }

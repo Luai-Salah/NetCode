@@ -16,9 +16,6 @@ namespace Xedrial.NetCode.Client.Systems
         //We will use the BeginSimulationEntityCommandBufferSystem for our structural changes
         private BeginSimulationEntityCommandBufferSystem m_BeginSimEcb;
 
-        //We need this system group so we can grab its "ServerTick" for prediction when we respond to Commands
-        private ClientSimulationSystemGroup m_ClientSimulationSystemGroup;
-
         //We use this for thin client command generation
         private int m_FrameCount;
 
@@ -26,28 +23,24 @@ namespace Xedrial.NetCode.Client.Systems
         {
 
             //This will grab the BeginSimulationEntityCommandBuffer system to be used in OnUpdate
-            m_BeginSimEcb = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
-
-            //We set our ClientSimulationSystemGroup who will provide its ServerTick needed for the Commands
-            m_ClientSimulationSystemGroup = World.GetOrCreateSystem<ClientSimulationSystemGroup>();
-
+            m_BeginSimEcb = World.GetOrCreateSystemManaged<BeginSimulationEntityCommandBufferSystem>();
 
             //The client must have loaded the game to spawn a player so we wait for the 
             //NetworkStreamInGame component added during the load game flow
-            RequireSingletonForUpdate<NetworkStreamInGame>();
+            RequireForUpdate<NetworkStreamInGame>();
         }
 
         protected override void OnUpdate()
         {
-            bool isThinClient = HasSingleton<ThinClientComponent>();
-            if (HasSingleton<CommandTargetComponent>() && GetSingleton<CommandTargetComponent>().targetEntity == Entity.Null)
+            bool isThinClient = World.IsThinClient();
+            if (SystemAPI.HasSingleton<CommandTarget>() && SystemAPI.GetSingleton<CommandTarget>().targetEntity == Entity.Null)
             {
                 if (isThinClient)
                 {
                     // No ghosts are spawned, so create a placeholder struct to store the commands in
                     Entity ent = EntityManager.CreateEntity();
                     EntityManager.AddBuffer<PlayerCommand>(ent);
-                    SetSingleton(new CommandTargetComponent{targetEntity = ent});
+                    SystemAPI.SetSingleton(new CommandTarget{targetEntity = ent});
                 }
             }
             
@@ -95,7 +88,7 @@ namespace Xedrial.NetCode.Client.Systems
             else
             {
                 // Spawn and generate some random inputs
-                int state = (int) Time.ElapsedTime % 3;
+                int state = (int) SystemAPI.Time.ElapsedTime % 3;
                 if (state == 0)
                 {
                     left = 1;
@@ -112,13 +105,13 @@ namespace Xedrial.NetCode.Client.Systems
             }
 
             //We are sending the simulationSystemGroup tick so the server can playback our commands appropriately
-            uint inputTargetTick = m_ClientSimulationSystemGroup.ServerTick;    
+            NetworkTick inputTargetTick = SystemAPI.GetSingleton<NetworkTime>().ServerTick;    
             //Must declare local variables before using them in the .ForEach()
             EntityCommandBuffer commandBuffer = m_BeginSimEcb.CreateCommandBuffer();
             // This is how we will grab the buffer of PlayerCommands from the player prefab
-            BufferFromEntity<PlayerCommand> inputFromEntity = GetBufferFromEntity<PlayerCommand>();
+            BufferLookup<PlayerCommand> inputFromEntity = SystemAPI.GetBufferLookup<PlayerCommand>();
 
-            TryGetSingletonEntity<PlayerCommand>(out Entity targetEntity);
+            SystemAPI.TryGetSingletonEntity<PlayerCommand>(out Entity targetEntity);
             Job.WithCode(() => {
                 if (isThinClient && shoot != 0)
                 {
@@ -126,7 +119,7 @@ namespace Xedrial.NetCode.Client.Systems
                     // This means every time we shoot we also send an RPC, but the Server protects against creating more Players
                     Entity req = commandBuffer.CreateEntity();
                     commandBuffer.AddComponent<PlayerSpawnRequestRpc>(req);
-                    commandBuffer.AddComponent(req, new SendRpcCommandRequestComponent());
+                    commandBuffer.AddComponent(req, new SendRpcCommandRequest());
                 }
                 if (targetEntity == Entity.Null)
                 {
@@ -135,7 +128,7 @@ namespace Xedrial.NetCode.Client.Systems
                     
                     Entity req = commandBuffer.CreateEntity();
                     commandBuffer.AddComponent<PlayerSpawnRequestRpc>(req);
-                    commandBuffer.AddComponent(req, new SendRpcCommandRequestComponent());
+                    commandBuffer.AddComponent(req, new SendRpcCommandRequest());
                 }
                 else
                 {

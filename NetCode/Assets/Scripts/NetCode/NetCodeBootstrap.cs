@@ -10,19 +10,7 @@ namespace Xedrial.NetCode
     {
         public override bool Initialize(string defaultWorldName)
         {
-            var world = new World(defaultWorldName);
-            World.DefaultGameObjectInjectionWorld = world;
-
-            IReadOnlyList<Type> systems = DefaultWorldInitialization.GetAllSystems(
-                WorldSystemFilterFlags.Default
-            );
-            
-            GenerateSystemLists(systems);
-
-            DefaultWorldInitialization.AddSystemsToRootLevelSystemGroups(world, ExplicitDefaultWorldSystems);
-#if !UNITY_DOTSRUNTIME
-            ScriptBehaviourUpdateOrder.AppendWorldToCurrentPlayerLoop(world);
-#endif
+            CreateLocalWorld(defaultWorldName);
             return true;
         }
     }

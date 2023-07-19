@@ -1,23 +1,27 @@
-using UnityEngine;
-
 using Unity.Entities;
 using Unity.Mathematics;
+using UnityEngine;
+using Xedrial.NetCode.Components;
 
-namespace Xedrial.NetCode.Components
+namespace Xedrial.NetCode.Authoring
 {
-    public class SetBulletSpawnOffset : MonoBehaviour, IConvertGameObjectToEntity
+    public class SetBulletSpawnOffset : MonoBehaviour
     {
         public GameObject m_BulletSpawn;
-
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+        
+        private class SetBulletSpawnOffsetBaker : Baker<SetBulletSpawnOffset>
         {
-            var bulletOffset = default(BulletSpawnOffsetComponent);
+            public override void Bake(SetBulletSpawnOffset authoring)
+            {
+                var bulletOffset = default(BulletSpawnOffset);
 
-            Vector3 offsetVector = m_BulletSpawn.transform.position;
-            bulletOffset.Value = new float3(offsetVector.x, offsetVector.y, offsetVector.z);        
+                Vector3 offsetVector = authoring.m_BulletSpawn.transform.position;
+                bulletOffset.Value = new float3(offsetVector.x, offsetVector.y, offsetVector.z);
 
-            dstManager.AddComponentData(entity, bulletOffset);
-            dstManager.AddComponent<WeaponCoolDownComponent>(entity);
+                Entity entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, bulletOffset);
+                AddComponent<WeaponCoolDownComponent>(entity);
+            }
         }
     }
 }

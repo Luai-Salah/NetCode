@@ -9,7 +9,7 @@ using Xedrial.Physics.b2D.Components;
 namespace Xedrial.NetCode.Server.Systems
 {
     //Asteroid spawning will occur on the server
-    [UpdateInGroup(typeof(ServerSimulationSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial class AsteroidSpawnSystem : SystemBase
     {
         //This will be our query for Asteroids
@@ -28,7 +28,7 @@ namespace Xedrial.NetCode.Server.Systems
         
         protected override void OnCreate()
         {
-            m_BeginEcb = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
+            m_BeginEcb = World.GetOrCreateSystemManaged<BeginSimulationEntityCommandBufferSystem>();
             
             //This is an EntityQuery for our Asteroids, they must have an AsteroidTag
             m_AsteroidQuery = GetEntityQuery(ComponentType.ReadWrite<AsteroidTag>());
@@ -37,7 +37,7 @@ namespace Xedrial.NetCode.Server.Systems
             World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
 
             //This is an EntityQuery for the GameSettingsComponent which will drive how many Asteroids we spawn
-            m_GameSettingsQuery = GetEntityQuery(ComponentType.ReadWrite<GameSettingsComponent>());
+            m_GameSettingsQuery = GetEntityQuery(ComponentType.ReadWrite<GameSettings>());
 
             //This says "do not go to the OnUpdate method until an entity exists that meets this query"
             //We are using GameObjectConversion to create our GameSettingsComponent so we need to make sure 
@@ -64,7 +64,7 @@ namespace Xedrial.NetCode.Server.Systems
             {
                 //We grab the converted PrefabCollection Entity's AsteroidAuthoringComponent
                 //and set m_Prefab to its Prefab value
-                m_Prefab = GetSingleton<AsteroidAuthoringComponent>().Prefab;
+                m_Prefab = SystemAPI.GetSingleton<AsteroidAuthoringComponent>().Prefab;
                 //we must "return" after setting this prefab because if we were to continue into the Job
                 //we would run into errors because the variable was JUST set (ECS funny business)
                 //comment out return and see the error
@@ -73,7 +73,7 @@ namespace Xedrial.NetCode.Server.Systems
 
             // Because of how ECS works we must declare local variables that will be used within the job
             //You cannot "GetSingleton<GameSettingsComponent>()" from within the job, must be declared outside
-            var settings = GetSingleton<GameSettingsComponent>();
+            var settings = SystemAPI.GetSingleton<GameSettings>();
 
             //This provides the current amount of Asteroids in the EntityQuery
             int count = m_AsteroidQuery.CalculateEntityCountWithoutFiltering();
@@ -124,13 +124,14 @@ namespace Xedrial.NetCode.Server.Systems
                     }
 
                     //we then create a new translation component with the randomly generated x, y, and z values                
-                    var pos = new Translation { Value = new float3(xPosition, yPosition, 0.0f) };
-
+                    var transform = LocalTransform.Identity;
+                    transform.Position = new float3(xPosition, yPosition, 0.0f);
+                    
                     //on our command buffer we record creating an entity from our Asteroid prefab
                     Entity e = ecb.Instantiate(asteroidPrefab);
 
                     //we then set the Translation component of the Asteroid prefab equal to our new translation component
-                    ecb.SetComponent(e, pos);
+                    ecb.SetComponent(e, transform);
 
                     //We will now set the PhysicsVelocity of our asteroids
                     //here we generate a random Vector3 with x, y and z between -1 and 1

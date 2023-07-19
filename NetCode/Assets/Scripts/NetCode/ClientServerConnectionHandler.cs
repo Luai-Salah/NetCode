@@ -48,7 +48,7 @@ namespace Xedrial.NetCode
                     {
                         // we cycle through all the worlds, and if the world has ServerSimulationSystemGroup
                         // we move forward (because that is the server world)
-                        if (world.GetExistingSystem<ServerSimulationSystemGroup>() == null)
+                        if (!world.IsServer())
                             continue;
                         
                         Entity serverDataEntity = world.EntityManager.CreateEntity();
@@ -81,7 +81,7 @@ namespace Xedrial.NetCode
                 {
                     //we cycle through all the worlds, and if the world has ClientSimulationSystemGroup
                     //we move forward (because that is the client world)
-                    if (world.GetExistingSystem<ClientSimulationSystemGroup>() == null)
+                    if (!world.IsClient())
                         continue;
                     
                     Entity clientDataEntity = world.EntityManager.CreateEntity();
@@ -114,7 +114,8 @@ namespace Xedrial.NetCode
         private void OnDestroy()
         {
             // This query deletes all entities
-            World.DefaultGameObjectInjectionWorld.EntityManager.DestroyEntity(World.DefaultGameObjectInjectionWorld.EntityManager.UniversalQuery);
+            if (World.DefaultGameObjectInjectionWorld != null)
+                World.DefaultGameObjectInjectionWorld.EntityManager.DestroyEntity(World.DefaultGameObjectInjectionWorld.EntityManager.UniversalQuery);
             // This query deletes all worlds
             World.DisposeAllWorlds();
 

@@ -71,18 +71,13 @@ namespace Xedrial.NetCode
             //CreateServerWorld is a method provided by ClientServerBootstrap for precisely this reason
             //Manual creation of worlds
 
-            //We must grab the DefaultGameObjectInjectionWorld first as it is needed to create our ServerWorld
-            var world = World.DefaultGameObjectInjectionWorld;
 #if !UNITY_CLIENT || UNITY_SERVER || UNITY_EDITOR
-            ClientServerBootstrap.CreateServerWorld(world, "ServerWorld");
+            ClientServerBootstrap.CreateServerWorld("ServerWorld");
 #endif
         }
 
         private static void ClientLauncher()
         {
-            // First we grab the DefaultGameObjectInjectionWorld because it is needed to create ClientWorld
-            var world = World.DefaultGameObjectInjectionWorld;
-
             // We have to account for the fact that we may be in the Editor and using ThinClients
             // We initially start with 1 client world which will not change if not in the editor
             const int numClientWorlds = 1;
@@ -96,13 +91,10 @@ namespace Xedrial.NetCode
 #endif
             // We create the necessary number of worlds and append the number to the end
             for (int i = 0; i < numClientWorlds; ++i)
-                ClientServerBootstrap.CreateClientWorld(world, "ClientWorld" + i);
+                ClientServerBootstrap.CreateClientWorld("ClientWorld" + i);
 #if UNITY_EDITOR
             for (int i = numClientWorlds; i < totalNumClients; ++i)
-            {
-                World clientWorld = ClientServerBootstrap.CreateClientWorld(world, "ClientWorld" + i);
-                clientWorld.EntityManager.CreateEntity(typeof(ThinClientComponent));
-            }
+                ClientServerBootstrap.CreateThinClientWorld();
 #endif
         }
 

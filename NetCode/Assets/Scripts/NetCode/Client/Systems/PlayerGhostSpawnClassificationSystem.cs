@@ -8,7 +8,7 @@ using Xedrial.NetCode.Components;
 namespace Xedrial.NetCode.Client.Systems
 {
     //We are updating only in the client world because only the client must specify exactly which player entity it "owns"
-    [UpdateInWorld(TargetWorld.Client)]
+    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     //We will be updating after NetCode's GhostSpawnClassificationSystem because we want
     //to ensure that the PredictedGhostComponent (which it adds) is available on the player entity to identify it
     [UpdateInGroup(typeof(GhostSimulationSystemGroup))]
@@ -22,11 +22,11 @@ namespace Xedrial.NetCode.Client.Systems
 
         protected override void OnCreate()
         {
-            m_BeginSimEcb = World.GetExistingSystem<BeginSimulationEntityCommandBufferSystem>();
+            m_BeginSimEcb = World.GetExistingSystemManaged<BeginSimulationEntityCommandBufferSystem>();
 
             //We need to make sure we have NCE before we start the update loop (otherwise it's unnecessary)
-            RequireSingletonForUpdate<NetworkIdComponent>();
-            RequireSingletonForUpdate<CameraAuthoringComponent>();
+            RequireForUpdate<NetworkId>();
+            RequireForUpdate<CameraAuthoringComponent>();
         }
 
         protected override void OnUpdate()
@@ -41,17 +41,14 @@ namespace Xedrial.NetCode.Client.Systems
         
             EntityCommandBuffer.ParallelWriter commandBuffer = m_BeginSimEcb.CreateCommandBuffer().AsParallelWriter();
         
-            //We must declare our local variables before using them
-            Entity camera = m_CameraPrefab;
             //The "playerEntity" is the NCE
-            var networkIdComponent = GetSingleton<NetworkIdComponent>();
-            ComponentDataFromEntity<CommandTargetComponent> _ = GetComponentDataFromEntity<CommandTargetComponent>();
+            var networkIdComponent = SystemAPI.GetSingleton<NetworkId>();
 
             //We will look for Player prefabs that we have not added a "PlayerClassifiedTag" to (which means we have checked the player if it is "ours")
             Entities
                 .WithAll<PlayerTag>()
                 .WithNone<PlayerClassifiedTag>()
-                .ForEach((Entity entity, int entityInQueryIndex, in GhostOwnerComponent ghostOwnerComponent) =>
+                .ForEach((Entity entity, int entityInQueryIndex, in GhostOwner ghostOwnerComponent) =>
                 {
                     // If this is true this means this Player is mine (because the GhostOwnerComponent value is equal to the NetworkId)
                     // Remember the GhostOwnerComponent value is set by the server and is ghosted to the client

@@ -6,7 +6,7 @@ namespace Xedrial.NetCode.Client.Systems
 {
     //This system will only run on the client and within GhostSimulationSystemGroup
     //and after GhostSpawnClassification system as is specified in the NetCode documentation
-    [UpdateInWorld(TargetWorld.Client)]
+    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     [UpdateInGroup(typeof(GhostSimulationSystemGroup))]
     [UpdateAfter(typeof(GhostSpawnClassificationSystem))]
     public partial class BulletGhostSpawnClassificationSystem : SystemBase
@@ -14,8 +14,8 @@ namespace Xedrial.NetCode.Client.Systems
         protected override void OnCreate()
         {
             //Both of these components are needed in the OnUpdate so we will wait until they exist to update
-            RequireSingletonForUpdate<GhostSpawnQueueComponent>();
-            RequireSingletonForUpdate<PredictedGhostSpawnList>();
+            RequireForUpdate<GhostSpawnQueue>();
+            RequireForUpdate<PredictedGhostSpawnList>();
         }
         
         protected override void OnUpdate()
@@ -23,25 +23,25 @@ namespace Xedrial.NetCode.Client.Systems
             //This is the NetCode recommended method to identify predicted spawning for player spawned objects
             //More information can be found at: https://docs.unity3d.com/Packages/com.unity.netcode@0.5/manual/ghost-snapshots.html
             //under "Entity spawning"
-            Entity spawnListEntity = GetSingletonEntity<PredictedGhostSpawnList>();
-            BufferFromEntity<PredictedGhostSpawn> spawnListFromEntity = GetBufferFromEntity<PredictedGhostSpawn>();
+            Entity spawnListEntity = SystemAPI.GetSingletonEntity<PredictedGhostSpawnList>();
+            BufferLookup<PredictedGhostSpawn> spawnListLookup = SystemAPI.GetBufferLookup<PredictedGhostSpawn>();
             Dependency = Entities
-                .WithAll<GhostSpawnQueueComponent>()
+                .WithAll<GhostSpawnQueue>()
                 .WithoutBurst()
                 .ForEach((DynamicBuffer<GhostSpawnBuffer> ghosts, DynamicBuffer<SnapshotDataBuffer> _) =>
                 {
-                    DynamicBuffer<PredictedGhostSpawn> spawnList = spawnListFromEntity[spawnListEntity];
+                    DynamicBuffer<PredictedGhostSpawn> spawnList = spawnListLookup[spawnListEntity];
                     for (int i = 0; i < ghosts.Length; i++)
                     {
                         GhostSpawnBuffer ghost = ghosts[i];
                         if (ghost.SpawnType != GhostSpawnBuffer.Type.Predicted)
                             continue;
-                        
+
                         for (int j = 0; j < spawnList.Length; ++j)
                         {
                             if (ghost.GhostType != spawnList[j].ghostType ||
-                                SequenceHelpers.IsNewer(spawnList[j].spawnTick, ghost.ServerSpawnTick + 5) ||
-                                !SequenceHelpers.IsNewer(spawnList[j].spawnTick + 5, ghost.ServerSpawnTick)
+                                SequenceHelpers.IsNewer(spawnList[j].spawnTick.SerializedData, ghost.ServerSpawnTick.SerializedData + 5) ||
+                                !SequenceHelpers.IsNewer(spawnList[j].spawnTick.SerializedData + 5, ghost.ServerSpawnTick.SerializedData)
                             )
                                 continue;
                                 

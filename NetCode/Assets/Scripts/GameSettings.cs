@@ -2,8 +2,7 @@ using Unity.Entities;
 
 namespace AsteroidsDamage
 {
-    [GenerateAuthoringComponent]
-    public struct GameSettingsComponent : IComponentData
+    public struct GameSettings : IComponentData
     {
         public int NumberOfAsteroids;
         public float AsteroidVelocity;

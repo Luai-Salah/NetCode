@@ -59,7 +59,7 @@ namespace Xedrial.NetCode.UI
             m_ListView.makeItem = MakeItem;
             m_ListView.bindItem = BindItem;
             m_ListView.itemsSource = m_DiscoveredServerInfoObjects;
-            m_ListView.onSelectedIndicesChange += ints =>
+            m_ListView.selectedIndicesChanged += ints =>
             {
                 int[] selection = ints.ToArray();
                 if (selection is { Length: <= 0 })

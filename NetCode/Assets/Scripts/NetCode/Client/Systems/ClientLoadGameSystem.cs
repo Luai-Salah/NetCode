@@ -9,7 +9,7 @@ using AsteroidsDamage;
 //This will only run on the client because it updates in ClientSimulationSystemGroup (which the server does not have)
 namespace Xedrial.NetCode.Client.Systems
 {
-    [UpdateInGroup(typeof(ClientSimulationSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     [UpdateBefore(typeof(RpcSystem))]
     public partial class ClientLoadGameSystem : SystemBase
     {
@@ -18,37 +18,37 @@ namespace Xedrial.NetCode.Client.Systems
         protected override void OnCreate()
         {
             //We will be using the BeginSimECB
-            m_BeginSimEcb = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
+            m_BeginSimEcb = World.GetOrCreateSystemManaged<BeginSimulationEntityCommandBufferSystem>();
 
             //Requiring the ReceiveRpcCommandRequestComponent ensures that update is only run when an NCE exists
-            RequireForUpdate(GetEntityQuery(ComponentType.ReadOnly<SendClientGameRpc>(), ComponentType.ReadOnly<ReceiveRpcCommandRequestComponent>()));   
+            RequireForUpdate(GetEntityQuery(ComponentType.ReadOnly<SendClientGameRpc>(), ComponentType.ReadOnly<ReceiveRpcCommandRequest>()));   
             //This is just here to make sure the Sub Scene is streamed in before the client sets up the level data
-            RequireSingletonForUpdate<GameSettingsComponent>();
+            RequireForUpdate<GameSettings>();
         }
 
         protected override void OnUpdate()
         {
             //We must declare our local variables before using them within a job (.ForEach)
             EntityCommandBuffer commandBuffer = m_BeginSimEcb.CreateCommandBuffer();
-            Entity gameSettingsEntity = GetSingletonEntity<GameSettingsComponent>();
+            Entity gameSettingsEntity = SystemAPI.GetSingletonEntity<GameSettings>();
             
-            BufferFromEntity<OutgoingRpcDataStreamBufferComponent> rpcFromEntity
-                = GetBufferFromEntity<OutgoingRpcDataStreamBufferComponent>();
-            ComponentDataFromEntity<GameSettingsComponent> getGameSettingsComponentData
-                = GetComponentDataFromEntity<GameSettingsComponent>();
+            BufferLookup<OutgoingRpcDataStreamBuffer> rpcFromEntity
+                = SystemAPI.GetBufferLookup<OutgoingRpcDataStreamBuffer>();
+            ComponentLookup<GameSettings> getGameSettingsComponentData
+                = SystemAPI.GetComponentLookup<GameSettings>();
 
             Entities
-                .ForEach((Entity entity, in SendClientGameRpc request, in ReceiveRpcCommandRequestComponent requestSource) =>
+                .ForEach((Entity entity, in SendClientGameRpc request, in ReceiveRpcCommandRequest requestSource) =>
                 {
                     //This destroys the incoming RPC so the code is only run once
                     commandBuffer.DestroyEntity(entity);
 
                     //Check for disconnects before moving forward
-                    if (!rpcFromEntity.HasComponent(requestSource.SourceConnection))
+                    if (!rpcFromEntity.HasBuffer(requestSource.SourceConnection))
                         return;
 
                     //Set the game size (unnecessary right now but we are including it to show how it is done)
-                    getGameSettingsComponentData[gameSettingsEntity] = new GameSettingsComponent
+                    getGameSettingsComponentData[gameSettingsEntity] = new GameSettings
                     {
                         LevelWidth = request.LevelWidth,
                         LevelHeight = request.LevelHeight,
@@ -67,7 +67,7 @@ namespace Xedrial.NetCode.Client.Systems
                     //SendRpcCommandRequestComponent with our TargetConnection being the NCE with the server (which will send it to the server)
                     Entity levelReq = commandBuffer.CreateEntity();
                     commandBuffer.AddComponent(levelReq, new SendServerGameLoadedRpc());
-                    commandBuffer.AddComponent(levelReq, new SendRpcCommandRequestComponent {TargetConnection = requestSource.SourceConnection});
+                    commandBuffer.AddComponent(levelReq, new SendRpcCommandRequest {TargetConnection = requestSource.SourceConnection});
 
                     Debug.Log("Client loaded game");
                 }).Schedule();

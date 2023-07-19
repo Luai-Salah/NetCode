@@ -1,16 +1,14 @@
-using Unity.NetCode;
 using Unity.Entities;
 
 using AsteroidsDamage;
 using Xedrial.NetCode.Components;
-using Xedrial.Physics.b2D.Components;
 using Xedrial.Physics.b2D.Systems;
 
 namespace Xedrial.NetCode.Server.Systems
 {
     //We cannot use [UpdateInGroup(typeof(ServerSimulationSystemGroup))] because we already have a group defined
     //So we specify instead what world the system must run, ServerWorld
-    [UpdateInWorld(TargetWorld.Server)]
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     //We are going to update LATE once all other systems are complete
     //because we don't want to destroy the Entity before other systems have
     //had a chance to interact with it if they need to
@@ -21,7 +19,7 @@ namespace Xedrial.NetCode.Server.Systems
 
         protected override void OnCreate()
         {
-            m_PhysicsWorld = World.GetOrCreateSystem<PhysicsSystem>();
+            m_PhysicsWorld = World.GetOrCreateSystemManaged<PhysicsSystem>();
         }
 
         protected override void OnUpdate()
@@ -33,10 +31,10 @@ namespace Xedrial.NetCode.Server.Systems
                 .WithoutBurst()
                 .WithStructuralChanges()
                 .WithAll<DestroyTag, AsteroidTag>()
-                .ForEach((Entity entity, PhysicsBody2D rb) =>
+                .ForEach((Entity entity) =>
                 {
+                    m_PhysicsWorld.DestroyBody(entity);
                     EntityManager.DestroyEntity(entity);
-                    m_PhysicsWorld.DestroyBody(rb.RuntimeBody);
                 }).Run();
 
         }

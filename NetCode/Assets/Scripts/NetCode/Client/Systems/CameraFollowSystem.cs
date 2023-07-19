@@ -10,18 +10,16 @@ namespace Xedrial.NetCode.Client.Systems
     {
         protected override void OnUpdate()
         {
-            ComponentDataFromEntity<Translation> translationData = GetComponentDataFromEntity<Translation>();
+            ComponentLookup<LocalTransform> translationData = SystemAPI.GetComponentLookup<LocalTransform>();
 
             Entities
                 .ForEach((Entity entity, in CameraFollowComponent cameraFollow) =>
                 {
-                    if (!translationData.TryGetComponent(cameraFollow.Target, out Translation targetTranslation))
+                    if (!translationData.TryGetComponent(cameraFollow.Target, out LocalTransform targetTranslation))
                         return;
                     
-                    float z = translationData[entity].Value.z;
-                    translationData[entity] = new Translation {
-                        Value = new float3(targetTranslation.Value.xy, z)
-                    };
+                    targetTranslation.Position.z = translationData[entity].Position.z;
+                    translationData[entity] = targetTranslation;
                 }).Run();
         }
     }

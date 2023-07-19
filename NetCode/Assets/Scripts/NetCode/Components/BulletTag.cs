@@ -1,8 +1,8 @@
 using Unity.Entities;
+using UnityEngine;
 
 namespace Xedrial.NetCode.Components
 {
-    [GenerateAuthoringComponent]
     public struct BulletTag : IComponentData
     {
     }

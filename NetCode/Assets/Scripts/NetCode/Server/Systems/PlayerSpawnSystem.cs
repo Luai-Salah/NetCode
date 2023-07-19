@@ -4,9 +4,9 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Transforms;
-using UnityEngine;
 using Xedrial.NetCode.Commands;
 using Xedrial.NetCode.Components;
+using Xedrial.NetCode.Server.Components;
 
 namespace Xedrial.NetCode.Server.Systems
 {
@@ -16,7 +16,7 @@ namespace Xedrial.NetCode.Server.Systems
     }
 
     //Only the server will be running this system to spawn the player
-    [UpdateInGroup(typeof(ServerSimulationSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial class PlayerSpawnSystem : SystemBase
     {
         private BeginSimulationEntityCommandBufferSystem m_BeginSimEcb;
@@ -24,11 +24,11 @@ namespace Xedrial.NetCode.Server.Systems
 
         protected override void OnCreate()
         {
-            m_BeginSimEcb = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
+            m_BeginSimEcb = World.GetOrCreateSystemManaged<BeginSimulationEntityCommandBufferSystem>();
             
             //We check to ensure GameSettingsComponent exists to know if the SubScene has been streamed in
             //We need the SubScene for actions in our OnUpdate()
-            RequireSingletonForUpdate<GameSettingsComponent>(); 
+            RequireForUpdate<GameSettings>(); 
         }
 
         protected override void OnUpdate()
@@ -38,7 +38,7 @@ namespace Xedrial.NetCode.Server.Systems
             {
                 //We grab the converted PrefabCollection Entity's PlayerAuthoringComponent
                 //and set m_Prefab to its Prefab value
-                m_Prefab = GetSingleton<PlayerAuthoringComponent>().Prefab;
+                m_Prefab = SystemAPI.GetSingleton<PlayerPrefab>().Value;
                 //we must "return" after setting this prefab because if we were to continue into the Job
                 //we would run into errors because the variable was JUST set (ECS funny business)
                 //comment out return and see the error
@@ -48,25 +48,25 @@ namespace Xedrial.NetCode.Server.Systems
             //Because of how ECS works we must declare local variables that will be used within the job
             EntityCommandBuffer commandBuffer = m_BeginSimEcb.CreateCommandBuffer();
             Entity playerPrefab = m_Prefab;
-            var rand = new Unity.Mathematics.Random((uint) Stopwatch.GetTimestamp());
-            var gameSettings = GetSingleton<GameSettingsComponent>();
+            var rand = new Random((uint) Stopwatch.GetTimestamp());
+            var gameSettings = SystemAPI.GetSingleton<GameSettings>();
 
             //GetComponentDataFromEntity allows us to grab data from an entity that we don't have access to
             //until we are within a job
             //We know we will need to get the PlayerSpawningStateComponent from an NCE but we don't know which one yet
             //So we create a variable that will get PlayerSpawningStateComponent from an entity
-            var playerStateFromEntity = GetComponentDataFromEntity<PlayerSpawningStateComponent>();
+            var playerStateFromEntity = GetComponentLookup<PlayerSpawningStateComponent>();
 
             //Similar to playerStateFromEntity, these variables WILL get data from an entity (in the job below)
             //but do not have it currently
-            var commandTargetFromEntity = GetComponentDataFromEntity<CommandTargetComponent>();
-            var networkIdFromEntity = GetComponentDataFromEntity<NetworkIdComponent>();
+            var commandTargetFromEntity = GetComponentLookup<CommandTarget>();
+            var networkIdFromEntity = GetComponentLookup<NetworkId>();
 
             //We are looking for NCEs with a PlayerSpawnRequestRpc
             //That means the client associated with that NCE wants a player to be spawned for them
             Entities
                 .ForEach((Entity entity, in PlayerSpawnRequestRpc _,
-                    in ReceiveRpcCommandRequestComponent requestSource) =>
+                    in ReceiveRpcCommandRequest requestSource) =>
                 {
                     //We immediately destroy the request so we act on it once
                     commandBuffer.DestroyEntity(entity);
@@ -93,22 +93,15 @@ namespace Xedrial.NetCode.Server.Systems
                     float width = gameSettings.LevelWidth * .2f;
                     float height = gameSettings.LevelHeight * .2f;
 
-                    var pos = new Translation
-                    {
-                        Value = new float3(rand.NextFloat(-width, width), rand.NextFloat(-height, height), 0)
-                    };
-
-                    //We will not spawn a random rotation for simplicity but include
-                    //setting rotation for you to be able to update in your own projects if you like
-                    var rot = new Rotation {Value = Quaternion.identity};
+                    var transform = LocalTransform.Identity;
+                    transform.Position = new float3(rand.NextFloat(-width, width), rand.NextFloat(-height, height), 0);
 
                     //Here we set the components that already exist on the Player prefab
-                    commandBuffer.SetComponent(player, pos);
-                    commandBuffer.SetComponent(player, rot);
+                    commandBuffer.SetComponent(player, transform);
                     //This sets the GhostOwnerComponent value to the NCE NetworkId
-                    commandBuffer.SetComponent(player, new GhostOwnerComponent {NetworkId = networkIdFromEntity[requestSource.SourceConnection].Value});
+                    commandBuffer.SetComponent(player, new GhostOwner {NetworkId = networkIdFromEntity[requestSource.SourceConnection].Value});
                     //This sets the PlayerEntity value in PlayerEntityComponent to the NCE
-                    commandBuffer.SetComponent(player, new PlayerEntityComponent {PlayerEntity = requestSource.SourceConnection});
+                    commandBuffer.SetComponent(player, new PlayerEntity {Entity = requestSource.SourceConnection});
 
                     //Here we add a component that was not included in the Player prefab, PlayerSpawnInProgressTag
                     //This is a temporary tag used to make sure the entity was able to be created and will be removed
@@ -125,7 +118,7 @@ namespace Xedrial.NetCode.Server.Systems
     }
 
     //We want to complete the spawn before ghosts are sent on the server
-    [UpdateInGroup(typeof(ServerSimulationSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     [UpdateBefore(typeof(GhostSendSystem))]
     public partial class PlayerCompleteSpawnSystem : SystemBase
     {
@@ -133,7 +126,7 @@ namespace Xedrial.NetCode.Server.Systems
 
         protected override void OnCreate()
         {
-            m_BeginSimEcb = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
+            m_BeginSimEcb = World.GetOrCreateSystemManaged<BeginSimulationEntityCommandBufferSystem>();
         }
 
         protected override void OnUpdate()
@@ -144,17 +137,17 @@ namespace Xedrial.NetCode.Server.Systems
             //until we are within a job
             //We don't know exactly which NCE we currently want to grab data from, but we do know we will want to
             //so we use GetComponentDataFromEntity to prepare ECS that we will be grabbing this data from an entity
-            var playerStateFromEntity = GetComponentDataFromEntity<PlayerSpawningStateComponent>();
-            var commandTargetFromEntity = GetComponentDataFromEntity<CommandTargetComponent>();
-            var connectionFromEntity = GetComponentDataFromEntity<NetworkStreamConnection>();
+            var playerStateFromEntity = GetComponentLookup<PlayerSpawningStateComponent>();
+            var commandTargetFromEntity = GetComponentLookup<CommandTarget>();
+            var connectionFromEntity = GetComponentLookup<NetworkStreamConnection>();
 
             Entities.WithAll<PlayerSpawnInProgressTag>()
-                .ForEach((Entity entity, in PlayerEntityComponent player) =>
+                .ForEach((Entity entity, in PlayerEntity player) =>
                 {
                     // This is another check from Unity samples
                     // This ensures there was no disconnect
-                    if (!playerStateFromEntity.HasComponent(player.PlayerEntity) ||
-                        !connectionFromEntity[player.PlayerEntity].Value.IsCreated)
+                    if (!playerStateFromEntity.HasComponent(player.Entity) ||
+                        !connectionFromEntity[player.Entity].Value.IsCreated)
                     {
                         //Player was disconnected during spawn, or other error so delete
                         commandBuffer.DestroyEntity(entity);
@@ -165,9 +158,9 @@ namespace Xedrial.NetCode.Server.Systems
                     commandBuffer.RemoveComponent<PlayerSpawnInProgressTag>(entity);
 
                     //We now update the NCE to point at our player entity
-                    commandTargetFromEntity[player.PlayerEntity] = new CommandTargetComponent {targetEntity = entity};
+                    commandTargetFromEntity[player.Entity] = new CommandTarget {targetEntity = entity};
                     //We can now say that our player is no longer spawning so we set IsSpawning = 0 on the NCE
-                    playerStateFromEntity[player.PlayerEntity] = new PlayerSpawningStateComponent {IsSpawning = 0};
+                    playerStateFromEntity[player.Entity] = new PlayerSpawningStateComponent {IsSpawning = 0};
                 }).Schedule();
             
             m_BeginSimEcb.AddJobHandleForProducer(Dependency);

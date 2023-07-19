@@ -7,35 +7,19 @@ using Xedrial.NetCode.Components;
 
 namespace Xedrial.NetCode.Systems
 {
-    [UpdateInWorld(TargetWorld.ClientAndServer)]
-    [UpdateInGroup(typeof(GhostPredictionSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
+    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     public partial class BulletMovementSystem : SystemBase
     {
-        //This is a special NetCode group that provides a "prediction tick" and a fixed "DeltaTime"
-        private GhostPredictionSystemGroup m_PredictionGroup;
-        
-        protected override void OnCreate()
-        {
-            // m_BeginSimEcb = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
-
-            //We will grab this system so we can use its "prediction tick" and "DeltaTime"
-            m_PredictionGroup = World.GetOrCreateSystem<GhostPredictionSystemGroup>();
-        }
-        
         protected override void OnUpdate()
         {
-            uint currentTick = m_PredictionGroup.PredictingTick;
-            float deltaTime = m_PredictionGroup.Time.DeltaTime;
+            float deltaTime = SystemAPI.Time.DeltaTime;
 
             Entities
-                .WithAll<BulletTag>()
-                .ForEach((ref Translation translation, in PredictedGhostComponent predictedGhost,
-                    in Rotation rotation, in BulletSpeedComponent speed) =>
+                .WithAll<PredictedGhost, Simulate, BulletTag>()
+                .ForEach((ref LocalTransform transform, in BulletSpeed speed) =>
                 {
-                    if (!GhostPredictionSystemGroup.ShouldPredict(currentTick, predictedGhost))
-                        return;
-
-                    translation.Value += speed.Value * deltaTime * math.mul(rotation.Value, math.up());
+                    transform.Position += speed.Value * deltaTime * math.mul(transform.Rotation, math.up());
                 }).ScheduleParallel();
         }
     }

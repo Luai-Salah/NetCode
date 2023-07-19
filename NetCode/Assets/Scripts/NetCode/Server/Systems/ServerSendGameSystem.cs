@@ -13,7 +13,7 @@ namespace Xedrial.NetCode.Server.Systems
     //This system should only be run by the server (because the server sends the game settings)
     //By specifying to update in group ServerSimulationSystemGroup it also specifies that it must
     //be run by the server
-    [UpdateInGroup(typeof(ServerSimulationSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     [UpdateBefore(typeof(RpcSystem))]
     public partial class ServerSendGameSystem : SystemBase
     {
@@ -21,19 +21,19 @@ namespace Xedrial.NetCode.Server.Systems
 
         protected override void OnCreate()
         {
-            m_Barrier = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
-            RequireSingletonForUpdate<GameSettingsComponent>();
+            m_Barrier = World.GetOrCreateSystemManaged<BeginSimulationEntityCommandBufferSystem>();
+            RequireForUpdate<GameSettings>();
         }
 
         protected override void OnUpdate()
         {
             EntityCommandBuffer commandBuffer = m_Barrier.CreateCommandBuffer();
 
-            var serverData = GetSingleton<GameSettingsComponent>();
+            var serverData = SystemAPI.GetSingleton<GameSettings>();
 
             Entities
                 .WithNone<SentClientGameRpcTag>()
-                .ForEach((Entity entity, in NetworkIdComponent _) =>
+                .ForEach((Entity entity, in NetworkId _) =>
                 {
                     commandBuffer.AddComponent(entity, new SentClientGameRpcTag());
                     Entity req = commandBuffer.CreateEntity();
@@ -47,7 +47,7 @@ namespace Xedrial.NetCode.Server.Systems
                         BulletsPerSecond = serverData.BulletsPerSecond
                     });
 
-                    commandBuffer.AddComponent(req, new SendRpcCommandRequestComponent {TargetConnection = entity});
+                    commandBuffer.AddComponent(req, new SendRpcCommandRequest {TargetConnection = entity});
                 }).Schedule();
 
             m_Barrier.AddJobHandleForProducer(Dependency);

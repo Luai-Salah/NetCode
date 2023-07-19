@@ -3,7 +3,7 @@ using Unity.Mathematics;
 
 namespace Xedrial.NetCode.Components
 {
-    public struct BulletSpawnOffsetComponent : IComponentData
+    public struct BulletSpawnOffset : IComponentData
     {
         public float3 Value;
     }
